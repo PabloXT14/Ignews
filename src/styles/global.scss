@@ -9,6 +9,7 @@
 
     --gray-100: #E1E1E1;
     --gray-300: #A8A8B3;
+    --gray-800: #29292E;
     --gray-900: #121214;
 
     --cyan-500: #61DAFB;
@@ -33,7 +34,11 @@ body {
     color: var(--white);
 }
 
-body, input, textarea, select, button {
+body,
+input,
+textarea,
+select,
+button {
     font: 400 1rem 'Roboto', sans-serif;
 }
 
