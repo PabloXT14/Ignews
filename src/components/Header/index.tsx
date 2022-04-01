@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SignInButton } from '../SignInButton';
 import styles from './styles.module.scss';
 
 
@@ -23,6 +24,7 @@ export function Header() {
                         Posts
                     </a>
                 </nav>
+                <SignInButton />
             </div>
         </header>
     );
