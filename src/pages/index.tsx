@@ -1,4 +1,4 @@
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { SubscribeButton } from '../components/SubscribeButton';
 import { stripe } from '../services/stripe';
@@ -35,8 +35,8 @@ export default function Home({ product }: HomeProps) {
   )
 }
 
-// Função para realizar SSR no lado do servidor
-export const getServerSideProps: GetServerSideProps = async () => {
+// Função para realizar SSG no lado do servidor
+export const getStaticProps: GetStaticProps = async () => {
 
   // fazendo requisição de único preço do produto
   const price = await stripe.prices.retrieve('price_1KkZpmIyxqvrQyPPQX37CFhm', {
