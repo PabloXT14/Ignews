@@ -55,6 +55,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {// tudo dentro deste <props> é enviada para o <props> da página
       product
-    }
+    },
+    revalidate: 60 * 60 * 24,//24h = 1d -> tempo para que o next revalide/gere outra pré-página estatica para sua aplicação
   }
 }
