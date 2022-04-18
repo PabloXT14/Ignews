@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
-
 import GithubProvider from 'next-auth/providers/github';
+import { signIn } from 'next-auth/react';
+
 
 export default NextAuth({
     // Configure one or more authentication providers
@@ -13,7 +14,13 @@ export default NextAuth({
                     scope: 'read:user'
                 }
             }
-        }),
-        // ...add more providers here
-    ]
+        })
+    ],
+    callbacks: {
+        // Rotarnar dados do usuários logado
+        async signIn({ user, account, profile }) {
+            console.log(user);
+            return true
+        }
+    }
 })
