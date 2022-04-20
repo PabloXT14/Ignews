@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
-import { signIn } from 'next-auth/react';
-
+import { fauna } from '../../../services/fauna';
+import { query } from 'faunadb';
 
 export default NextAuth({
     // Configure one or more authentication providers
@@ -19,8 +19,22 @@ export default NextAuth({
     callbacks: {
         // Rotarnar dados do usuários logado
         async signIn({ user, account, profile }) {
-            console.log(user);
-            return true
-        }
+            const { email } = user;
+
+            // Testando para ver se conexão com o banco deu certo
+            try {// Caso sim
+                // chamando api de conexão com banco no fauna
+                await fauna.query(
+                    query.Create(// criar dado no banco
+                        query.Collection('users'),// Collection de inserção
+                        { data: { email } }// valor a ser inserido
+                    )
+                )
+
+                return true
+            } catch {// Caso não
+                return false
+            }
+        },
     }
 })
