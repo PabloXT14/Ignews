@@ -7,7 +7,7 @@ export const stripe = new Stripe(
         apiVersion: '2020-08-27',// versão da API
         appInfo: {// informações para metadados
             name: 'Ignews',// nome da nossa aplicação
-            version// versão da nossa aplicação
+            version: version// versão da nossa aplicação
         }
     }
 )
