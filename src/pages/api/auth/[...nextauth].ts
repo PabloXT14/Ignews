@@ -21,13 +21,29 @@ export default NextAuth({
         async signIn({ user, account, profile }) {
             const { email } = user;
 
-            // Testando para ver se conexão com o banco deu certo
-            try {// Caso sim
-                // chamando api de conexão com banco no fauna
+
+            try {
+                // Chamando api de conexão com banco no fauna, e testando para ver se usuário já existe no banco
                 await fauna.query(
-                    query.Create(// criar dado no banco
-                        query.Collection('users'),// Collection de inserção
-                        { data: { email } }// valor a ser inserido
+                    query.If(// Se usuário não existir no banco 
+                        query.Not(
+                            query.Exists(
+                                query.Match(
+                                    query.Index('user_by_email'),// 
+                                    query.Casefold(user.email)
+                                )
+                            )
+                        ),// Crie um novo usuário no banco
+                        query.Create(
+                            query.Collection('users'),
+                            { data: { email } }
+                        ),// Se não apenas busque os dados do usuário existente
+                        query.Get(
+                            query.Match(
+                                query.Index('user_by_email'),
+                                query.Casefold(user.email)
+                            )
+                        )
                     )
                 )
 
