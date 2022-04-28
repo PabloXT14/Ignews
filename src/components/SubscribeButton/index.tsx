@@ -1,4 +1,5 @@
 import { signIn, useSession } from 'next-auth/react';
+import { api } from '../../services/api';
 import styles from './styles.module.scss';
 
 /* ===== TIPAGENS ===== */
@@ -10,7 +11,7 @@ interface SubscribeButtonProps {
 export function SubscribeButton({ priceId }: SubscribeButtonProps) {
     const { data: session } = useSession();
 
-    function handleSubscribe() {
+    async function handleSubscribe() {
         // Verificando se usuário esta logado
         if (!session) {
             signIn('github');// redirecionando para sessão de signIn com github
@@ -19,6 +20,13 @@ export function SubscribeButton({ priceId }: SubscribeButtonProps) {
 
 
         // Criação da checkout session
+        try {
+            const response = await api.post('/subscribe');
+
+            const { sessionId } = response.data;
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
