@@ -1,5 +1,6 @@
 import { signIn, useSession } from 'next-auth/react';
 import { api } from '../../services/api';
+import { getStripeJs } from '../../services/stripe-js';
 import styles from './styles.module.scss';
 
 /* ===== TIPAGENS ===== */
@@ -23,9 +24,13 @@ export function SubscribeButton({ priceId }: SubscribeButtonProps) {
         try {
             const response = await api.post('/subscribe');
 
-            const { sessionId } = response.data;
+            const { sessionId } = response.data;// pegando id de sessão do usuário no stripe
+
+            const stripe = await getStripeJs();// objeto de acesso a sessão de checkout
+
+            await stripe.redirectToCheckout({ sessionId })// redirecionando para sessão de checkout
         } catch (error) {
-            console.log(error)
+            alert(error.message);
         }
     }
 
