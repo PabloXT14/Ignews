@@ -1,6 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
+import { fauna } from '../../services/fauna';
+import { query } from 'faunadb';
 import { stripe } from '../../services/stripe';
+
+
+type User = {
+    ref: {
+        id: string;
+    }
+    data: {
+        stripe_customer_id: string;
+    }
+}
+
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     // Verificando se requisição é do tipo POST
@@ -8,15 +21,49 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // Pegando dados do usuário logado através do cookie do browser
         const session = await getSession({ req });
 
-        //Cadastrando usuário como customer no stripe
-        const stripeCustomer = await stripe.customers.create({
-            email: session.user.email,
-        })
+
+        // Buscando dados do usuário logado no fauna
+        const user = await fauna.query<User>(
+            query.Get(
+                query.Match(// buscando email do usuário caso tenha no banco
+                    query.Index('user_by_email'),
+                    query.Casefold(session.user.email)
+                )
+            )
+        )
+
+        // Checando se usuário já tem id de cadastro no Stripe
+        let customerId = user.data.stripe_customer_id;
+
+        // Caso não tenha
+        if (!customerId) {
+            //Cadastrando/Criando usuário como customer no stripe
+            const stripeCustomer = await stripe.customers.create({
+                email: session.user.email,
+            })
+
+            //Salvando Id do usuário do stripe no Fauna
+            await fauna.query(
+                query.Update(
+                    query.Ref(query.Collection('users'), user.ref.id),
+                    {
+                        data: {
+                            stripe_customer_id: stripeCustomer.id
+                        }
+                    }
+                )
+            )
+
+            // Reatribuindo id de cadastro no stripe
+            customerId = stripeCustomer.id
+        }
+
+
 
         // Criando sessão de checkout do stripe
         const stripeCheckoutSession = await stripe.checkout.sessions.create({
             // quem está comprando nosso produto
-            customer: stripeCustomer.id,// id do usuário cadastrado no stripe
+            customer: customerId,// id do usuário cadastrado no stripe
             payment_method_types: ['card'],// métodos de pagamento
             billing_address_collection: 'required',//obrigar ou não cliente a colocar seu endereço
             line_items: [
